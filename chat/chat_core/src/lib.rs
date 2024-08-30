@@ -15,8 +15,7 @@ pub trait Agent {
 }
 
 #[derive(Debug, Clone)]
-pub struct AgentContext {
-}
+pub struct AgentContext {}
 
 #[derive(Debug, Clone)]
 pub enum AgentDecision {
