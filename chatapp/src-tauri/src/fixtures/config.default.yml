@@ -1,0 +1,3 @@
+server:
+  chat: "http://localhost:6688/api"
+  notification: "http://localhost:6687/events"

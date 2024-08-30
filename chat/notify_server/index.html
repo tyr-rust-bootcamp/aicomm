@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SSE handler</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+  </head>
+  <body>
+    <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <h1>Server Sent Events</h1>
+
+    <script lang="javascript">
+      let token = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MTQ4NDU0MjEsImV4cCI6MTcxNTQ1MDIyMSwibmJmIjoxNzE0ODQ1NDIxLCJpc3MiOiJjaGF0X3NlcnZlciIsImF1ZCI6ImNoYXRfd2ViIiwiaWQiOjEsIndzX2lkIjoxLCJmdWxsbmFtZSI6IlR5ciBDaGVuIiwiZW1haWwiOiJ0Y2hlbkBhY21lLm9yZyIsImNyZWF0ZWRfYXQiOiIyMDI0LTA1LTA0VDE3OjE4OjQ3LjAwNDI3N1oifQ.8dDhp6o2mPWvOC9TnaEIVr6jeu3idKjGTBQ8OSou_LCA2t6C9Mw6HOxO1SZuLmFtDiJaVXPBO3hIuw2Slfk7BQ';
+      let source = new EventSource(`/events?token=${token}`);
+      source.onmessage = function(event) {
+        console.log("Got:", event.data);
+      };
+      source.addEventListener("NewChat", function(event) {
+        console.log("NewChat:", event.data);
+      });
+
+      source.addEventListener("AddToChat", function(event) {
+        console.log("AddToChat:", event.data);
+      });
+
+      source.addEventListener("RemoveFromChat", function(event) {
+        console.log("RemoveFromChat:", event.data);
+      });
+
+      source.addEventListener("NewMessage", function(event) {
+        console.log("NewMessage:", event.data);
+      });
+    </script>
+  </body>
+</html>
