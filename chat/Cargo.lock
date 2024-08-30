@@ -442,6 +442,7 @@ dependencies = [
  "jwt-simple",
  "serde",
  "sqlx",
+ "thiserror",
  "tokio",
  "tower",
  "tower-http",
