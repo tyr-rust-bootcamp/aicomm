@@ -51,7 +51,7 @@ impl AppState {
             r#"
           INSERT INTO messages (chat_id, sender_id, content, files)
           VALUES ($1, $2, $3, $4)
-          RETURNING id, chat_id, sender_id, content, files, created_at
+          RETURNING id, chat_id, sender_id, content, modified_content, files, created_at
           "#,
         )
         .bind(chat_id as i64)
@@ -78,7 +78,7 @@ impl AppState {
 
         let messages: Vec<Message> = sqlx::query_as(
             r#"
-        SELECT id, chat_id, sender_id, content, files, created_at
+        SELECT id, chat_id, sender_id, content, modified_content, files, created_at
         FROM messages
         WHERE chat_id = $1
         AND id < $2

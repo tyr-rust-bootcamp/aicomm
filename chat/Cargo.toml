@@ -18,6 +18,7 @@ chat-server = { path = "./chat_server" }
 jwt-simple = "0.12.9"
 notify-server = { path = "./notify_server" }
 serde = { version = "1.0.198", features = ["derive"] }
+serde_json = "1.0.128"
 serde_yaml = "0.9.34"
 sqlx = { version = "0.7.4", features = [
   "chrono",
