@@ -105,36 +105,18 @@ pub struct Message {
     #[serde(alias = "createdAt")]
     pub created_at: DateTime<Utc>,
 }
-/*
 
--- add agent_type type
-CREATE TYPE agent_type AS ENUM ('proxy', 'reply', 'tap');
-
--- add chat_agent table
-CREATE TABLE IF NOT EXISTS chat_agents(
-  id BIGSERIAL PRIMARY KEY,
-  chat_id BIGINT NOT NULL REFERENCES chats(id),
-  name TEXT NOT NULL UNIQUE,
-  type agent_type NOT NULL DEFAULT 'reply',
-  prompt TEXT NOT NULL,
-  args JSONB NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (chat_id, agent_id)
-);
- */
-
- #[derive(Debug, Clone, ToSchema, Serialize, Deserialize, PartialEq, PartialOrd, sqlx::Type)]
- #[sqlx(type_name = "agent_type", rename_all = "snake_case")]
- #[serde(rename_all(serialize = "camelCase"))]
- pub enum AgentType {
-     #[serde(alias = "proxy", alias = "Proxy")]
-     Proxy,
-     #[serde(alias = "reply", alias = "Reply")]
-     Reply,
-     #[serde(alias = "tap", alias = "Tap")]
-     Tap,
- }
+#[derive(Debug, Clone, ToSchema, Serialize, Deserialize, PartialEq, PartialOrd, sqlx::Type)]
+#[sqlx(type_name = "agent_type", rename_all = "snake_case")]
+#[serde(rename_all(serialize = "camelCase"))]
+pub enum AgentType {
+    #[serde(alias = "proxy", alias = "Proxy")]
+    Proxy,
+    #[serde(alias = "reply", alias = "Reply")]
+    Reply,
+    #[serde(alias = "tap", alias = "Tap")]
+    Tap,
+}
 
 #[derive(Debug, Clone, FromRow, ToSchema, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all(serialize = "camelCase"))]
