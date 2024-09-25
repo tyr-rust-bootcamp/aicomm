@@ -3,33 +3,33 @@ members = ["chat_server", "chat_core", "notify_server", "chat_test"]
 resolver = "2"
 
 [workspace.dependencies]
-anyhow = "1.0.82"
-axum = { version = "0.7.5", features = [
+anyhow = "1.0.89"
+axum = { version = "0.7.6", features = [
   "http2",
   "query",
   "tracing",
   "multipart",
   # "macros",
 ] }
-axum-extra = { version = "0.9.3", features = ["typed-header"] }
+axum-extra = { version = "0.9.4", features = ["typed-header"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 chat-core = { path = "./chat_core" }
 chat-server = { path = "./chat_server" }
-jwt-simple = "0.12.9"
+jwt-simple = "0.12.10"
 notify-server = { path = "./notify_server" }
-serde = { version = "1.0.198", features = ["derive"] }
+serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
 serde_yaml = "0.9.34"
-sqlx = { version = "0.7.4", features = [
+sqlx = { version = "0.8.2", features = [
   "chrono",
   "postgres",
   "runtime-tokio",
   "tls-rustls",
 ] }
-thiserror = "1.0.59"
-tokio = { version = "1.37.0", features = ["rt", "rt-multi-thread", "macros"] }
-tower = "0.4.13"
-tower-http = { version = "0.5.2", features = [
+thiserror = "1.0.64"
+tokio = { version = "1.40.0", features = ["rt", "rt-multi-thread", "macros"] }
+tower = "0.5.1"
+tower-http = { version = "0.6.1", features = [
   "compression-full",
   "cors",
   "fs",
