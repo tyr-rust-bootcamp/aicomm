@@ -12,6 +12,16 @@
             <span class="text-xs text-gray-500">{{ message.formattedCreatedAt }}</span>
           </div>
           <div class="text-sm leading-relaxed break-words whitespace-pre-wrap">{{ message.content }}</div>
+          <div v-if="message.files && message.files.length > 0" class="grid grid-cols-3 gap-2 mt-2">
+            <div v-for="(file, index) in message.files" :key="index" class="relative">
+              <img
+                :src="getFileUrl(file)"
+                :class="{'h-32 object-cover cursor-pointer': true, 'w-auto h-auto': enlargedImage[message.id]}"
+                @click="toggleImage(message.id)"
+                alt="Uploaded file"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -19,7 +29,14 @@
 </template>
 
 <script>
+import { getUrlBase } from '../utils';
+
 export default {
+  data() {
+    return {
+      enlargedImage: {},
+    };
+  },
   computed: {
     messages() {
       return this.$store.getters.getMessagesForActiveChannel;
@@ -59,6 +76,13 @@ export default {
       if (container) {
         container.scrollTop = container.scrollHeight;
       }
+    },
+    getFileUrl(file) {
+      return `${getUrlBase()}${file}?token=${this.$store.state.token}`;
+    },
+    toggleImage(messageId) {
+      this.enlargedImage[messageId] = !this.enlargedImage[messageId];
+      this.enlargedImage = { ...this.enlargedImage };
     }
   },
   mounted() {
