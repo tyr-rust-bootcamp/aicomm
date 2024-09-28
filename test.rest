@@ -148,7 +148,9 @@ Hello, World!
 GET http://localhost:6688/api/files/1/339/807/e635afbeab088ce33206fdf4223a6bb156.png
 Authorization: Bearer {{token}}
 
+### get files with token
 
+GET http://localhost:6688/api/files/1/339/807/e635afbeab088ce33206fdf4223a6bb156.png?token={{token}}
 ### send a message
 
 POST http://localhost:6688/api/chats/1
