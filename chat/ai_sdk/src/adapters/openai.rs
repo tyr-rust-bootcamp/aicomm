@@ -1,7 +1,7 @@
+use crate::{AiService, Message};
+use anyhow::anyhow;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use anyhow::anyhow;
-use crate::{AiService, Message};
 
 pub struct OpenAIAdapter {
     host: String,
@@ -73,13 +73,20 @@ impl AiService for OpenAIAdapter {
         };
 
         let url = format!("{}/chat/completions", self.host);
-        let response = self.client.post(url)
+        let response = self
+            .client
+            .post(url)
             .json(&request)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .send()
             .await?;
         let mut data: OpenAIChatCompletionResponse = response.json().await?;
-        let content = data.choices.pop().ok_or(anyhow!("No response"))?.message.content;
+        let content = data
+            .choices
+            .pop()
+            .ok_or(anyhow!("No response"))?
+            .message
+            .content;
         Ok(content)
     }
 }
@@ -104,16 +111,19 @@ impl From<&Message> for OpenAIMessage {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::Role;
     use std::env;
-    use super::*;
 
     #[ignore]
     #[tokio::test]
     async fn openai_complete_should_work() {
         let api_key = env::var("OPENAI_API_KEY").unwrap();
         let adapter = OpenAIAdapter::new(api_key, "gpt-4o");
-        let messages = vec![Message { role: Role::User, content: "Hello".to_string() }];
+        let messages = vec![Message {
+            role: Role::User,
+            content: "Hello".to_string(),
+        }];
         let response = adapter.complete(&messages).await.unwrap();
         assert!(response.len() > 0);
     }

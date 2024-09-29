@@ -17,7 +17,6 @@ pub struct Message {
     pub content: String,
 }
 
-
 #[allow(async_fn_in_trait)]
 pub trait AiService {
     async fn complete(&self, messages: &[Message]) -> anyhow::Result<String>;

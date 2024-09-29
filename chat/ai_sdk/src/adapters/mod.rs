@@ -1,5 +1,5 @@
-mod openai;
 mod ollama;
+mod openai;
 
-pub use openai::*;
 pub use ollama::*;
+pub use openai::*;

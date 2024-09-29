@@ -1,6 +1,6 @@
+use crate::{AiService, Message};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use crate::{Message, AiService};
 
 pub struct OllamaAdapter {
     pub host: String,
@@ -40,13 +40,21 @@ impl OllamaAdapter {
         let host = host.into();
         let model = model.into();
         let client = Client::new();
-        Self { host, model, client }
+        Self {
+            host,
+            model,
+            client,
+        }
     }
 
     pub fn new_local(model: impl Into<String>) -> Self {
         let model = model.into();
         let client = Client::new();
-        Self { host: "http://localhost:11434".to_string(), model, client }
+        Self {
+            host: "http://localhost:11434".to_string(),
+            model,
+            client,
+        }
     }
 }
 
@@ -64,9 +72,7 @@ impl AiService for OllamaAdapter {
             stream: false,
         };
         let url = format!("{}/api/chat", self.host);
-        let response = self.client.post(url)
-            .json(&request)
-            .send().await?;
+        let response = self.client.post(url).json(&request).send().await?;
         let response: OllamaChatCompletionResponse = response.json().await?;
         Ok(response.message.content)
     }
@@ -74,26 +80,35 @@ impl AiService for OllamaAdapter {
 
 impl From<Message> for OllamaMessage {
     fn from(message: Message) -> Self {
-        OllamaMessage { role: message.role.to_string(), content: message.content }
+        OllamaMessage {
+            role: message.role.to_string(),
+            content: message.content,
+        }
     }
 }
 
 impl From<&Message> for OllamaMessage {
     fn from(message: &Message) -> Self {
-        OllamaMessage { role: message.role.to_string(), content: message.content.clone() }
+        OllamaMessage {
+            role: message.role.to_string(),
+            content: message.content.clone(),
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::Role;
     use super::*;
+    use crate::Role;
 
     #[ignore]
     #[tokio::test]
     async fn ollama_complete_should_work() {
         let adapter = OllamaAdapter::new_local("llama3.2");
-        let messages = vec![Message { role: Role::User, content: "Hello".to_string() }];
+        let messages = vec![Message {
+            role: Role::User,
+            content: "Hello".to_string(),
+        }];
         let response = adapter.complete(&messages).await.unwrap();
         println!("response: {}", response);
     }
