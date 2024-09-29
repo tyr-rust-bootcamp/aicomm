@@ -18,6 +18,15 @@ pub enum AppError {
     #[error("create chat error: {0}")]
     CreateChatError(String),
 
+    #[error("create agent error: {0}")]
+    CreateAgentError(String),
+
+    #[error("update agent error: {0}")]
+    UpdateAgentError(String),
+
+    #[error("user {user_id} is not member of chat {chat_id}")]
+    NotChatMemberError { user_id: u64, chat_id: u64 },
+
     #[error("create message error: {0}")]
     CreateMessageError(String),
 
@@ -60,6 +69,9 @@ impl IntoResponse for AppError {
             Self::HttpHeaderError(_) => StatusCode::UNPROCESSABLE_ENTITY,
             Self::EmailAlreadyExists(_) => StatusCode::CONFLICT,
             Self::CreateChatError(_) => StatusCode::BAD_REQUEST,
+            Self::CreateAgentError(_) => StatusCode::BAD_REQUEST,
+            Self::UpdateAgentError(_) => StatusCode::BAD_REQUEST,
+            Self::NotChatMemberError { .. } => StatusCode::FORBIDDEN,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::IoError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::CreateMessageError(_) => StatusCode::BAD_REQUEST,

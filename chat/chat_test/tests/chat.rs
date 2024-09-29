@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chat_core::{Chat, ChatType, Message};
+use chat_core::{Chat, ChatAgent, ChatType, Message};
 use futures::StreamExt;
 use reqwest::{
     multipart::{Form, Part},
@@ -49,6 +49,7 @@ async fn chat_server_should_work() -> Result<()> {
     let db_url = tdb.url();
     NotifyServer::new(&db_url, &chat_server.token).await?;
     let chat = chat_server.create_chat().await?;
+    let _agent = chat_server.create_agent(chat.id as u64).await?;
     let _msg = chat_server.create_message(chat.id as u64).await?;
     sleep(Duration::from_secs(1)).await;
     Ok(())
@@ -158,6 +159,21 @@ impl ChatServer {
         assert_eq!(chat.r#type, ChatType::PrivateChannel);
 
         Ok(chat)
+    }
+
+    async fn create_agent(&self, chat_id: u64) -> Result<ChatAgent> {
+        let res = self
+            .client
+            .post(format!("http://{}/api/chats/{}/agents", self.addr, chat_id))
+            .header("Authorization", format!("Bearer {}", self.token))
+            .header("Content-Type", "application/json")
+            .body(
+                r#"{"name": "test agent", "type": "proxy", "prompt": "You are a helpful agent"}"#,
+            );
+        let res = res.send().await?;
+        assert_eq!(res.status(), StatusCode::CREATED);
+        let agent: ChatAgent = res.json().await?;
+        Ok(agent)
     }
 
     async fn create_message(&self, chat_id: u64) -> Result<Message> {

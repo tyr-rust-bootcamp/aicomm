@@ -52,6 +52,12 @@ pub async fn get_router(state: AppState) -> Result<Router, AppError> {
                 .delete(delete_chat_handler)
                 .post(send_message_handler),
         )
+        .route(
+            "/:id/agents",
+            get(list_agent_handler)
+                .post(create_agent_handler)
+                .patch(update_agent_handler),
+        )
         .route("/:id/messages", get(list_message_handler))
         .layer(from_fn_with_state(state.clone(), verify_chat))
         .route("/", get(list_chat_handler).post(create_chat_handler));

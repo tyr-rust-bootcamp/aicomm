@@ -1,3 +1,4 @@
+mod agent;
 mod auth;
 mod chat;
 mod messages;
@@ -5,6 +6,7 @@ mod workspace;
 
 use axum::response::IntoResponse;
 
+pub(crate) use agent::*;
 pub(crate) use auth::*;
 pub(crate) use chat::*;
 pub(crate) use messages::*;
