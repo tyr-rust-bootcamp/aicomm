@@ -1,5 +1,5 @@
 [workspace]
-members = ["chat_server", "chat_core", "notify_server", "chat_test"]
+members = ["chat_server", "chat_core", "notify_server", "chat_test", "ai_sdk"]
 resolver = "2"
 
 [workspace.dependencies]

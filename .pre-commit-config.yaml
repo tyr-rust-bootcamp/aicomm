@@ -58,7 +58,7 @@ repos:
       - id: cargo-test
         name: cargo test
         description: unit test for the project
-        entry: bash -c 'for dir in chat chatapp/src-tauri; do (cd $dir && cargo nextest run --all-features); done'
+        entry: bash -c 'for dir in chat chatapp/src-tauri; do (cd $dir && cargo nextest run --all-features -- --include-ignored); done'
         language: rust
         files: \.rs$
         pass_filenames: false

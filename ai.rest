@@ -1,0 +1,40 @@
+### use openai
+
+POST https://api.openai.com/v1/chat/completions
+Authorization: Bearer {{$processEnv OPENAI_KEY}}
+Content-Type: application/json
+
+{
+    "model": "gpt-4o",
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a friendly assistant that answers questions based on your knowledge. Your reply will be limited to 100 words. reply with simplified Chinese, unless the question asks for a specific language."
+        },
+        {
+            "role": "user",
+            "content": "中国上最长的河流是哪条？"
+        }
+    ]
+}
+
+### use ollama
+
+POST http://localhost:11434/api/chat
+Content-Type: application/json
+
+
+{
+    "model": "llama3.2",
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a friendly assistant that answers questions based on your knowledge. Your reply will be limited to 100 words. reply with simplified Chinese, unless the question asks for a specific language."
+        },
+        {
+            "role": "user",
+            "content": "中国上最长的河流是哪条？"
+        }
+    ],
+    "stream": false
+}
