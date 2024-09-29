@@ -125,6 +125,6 @@ mod tests {
             content: "Hello".to_string(),
         }];
         let response = adapter.complete(&messages).await.unwrap();
-        assert!(response.len() > 0);
+        assert!(!response.is_empty());
     }
 }
