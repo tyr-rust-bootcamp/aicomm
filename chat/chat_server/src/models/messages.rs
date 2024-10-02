@@ -104,9 +104,8 @@ impl AppState {
               "#,
             )
             .bind(chat_id as i64)
-            .bind(other_user_id as i64)
+            .bind(other_user_id)
             .bind(reply)
-            .bind(&input.files)
             .fetch_one(&self.pool)
             .await?;
         }
