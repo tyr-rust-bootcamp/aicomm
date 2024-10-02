@@ -11,7 +11,7 @@
             <span class="font-bold mr-2">{{ getSender(message.senderId).fullname }}</span>
             <span class="text-xs text-gray-500">{{ message.formattedCreatedAt }}</span>
           </div>
-          <div class="text-sm leading-relaxed break-words whitespace-pre-wrap">{{ message.content }}</div>
+          <div class="text-sm leading-relaxed break-words whitespace-pre-wrap">{{ getMessageContent(message) }}</div>
           <div v-if="message.files && message.files.length > 0" class="grid grid-cols-3 gap-2 mt-2">
             <div v-for="(file, index) in message.files" :key="index" class="relative">
               <img
@@ -83,6 +83,15 @@ export default {
     toggleImage(messageId) {
       this.enlargedImage[messageId] = !this.enlargedImage[messageId];
       this.enlargedImage = { ...this.enlargedImage };
+    },
+    getMessageContent(message) {
+      if (message.senderId === this.$store.state.user.id) {
+        return message.content;
+      } else {
+        return message.modifiedContent && message.modifiedContent.trim() !== ''
+          ? message.modifiedContent
+          : message.content;
+      }
     }
   },
   mounted() {

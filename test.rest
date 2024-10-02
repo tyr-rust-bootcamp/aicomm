@@ -176,12 +176,12 @@ Authorization: Bearer {{token}}
 
 ### create chat agent
 
-POST http://localhost:6688/api/chats/1/agents
+POST http://localhost:6688/api/chats/2/agents
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name": "translator",
+    "name": "translator1",
     "type": "proxy",
     "adapter": "openai",
     "model": "gpt-4o",
