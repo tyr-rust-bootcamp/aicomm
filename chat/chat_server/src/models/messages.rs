@@ -1,7 +1,8 @@
-use crate::{AppError, AppState, ChatFile};
-use chat_core::Message;
+use crate::{agent::AgentVariant, AppError, AppState, ChatFile};
+use chat_core::{Agent, AgentContext, AgentDecision, ChatType, Message};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use tracing::warn;
 use utoipa::{IntoParams, ToSchema};
 
 #[derive(Debug, Clone, ToSchema, Serialize, Deserialize)]
@@ -46,20 +47,69 @@ impl AppState {
             }
         }
 
+        // if we have agent, apply it and get the result
+        let mut agents = self.list_agents(chat_id).await?;
+        let decision = if let Some(agent) = agents.pop() {
+            let agent: AgentVariant = agent.into();
+            agent
+                .process(&input.content, &AgentContext::default())
+                .await?
+        } else {
+            AgentDecision::None
+        };
+
+        let modified_content = match decision {
+            AgentDecision::Modify(ref s) => Some(s),
+            _ => None,
+        };
+
         // create message
         let message: Message = sqlx::query_as(
             r#"
-          INSERT INTO messages (chat_id, sender_id, content, files)
-          VALUES ($1, $2, $3, $4)
-          RETURNING id, chat_id, sender_id, content, modified_content, files, created_at
+          INSERT INTO messages (chat_id, sender_id, content, modified_content, files)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING *
           "#,
         )
         .bind(chat_id as i64)
         .bind(user_id as i64)
         .bind(input.content)
+        .bind(modified_content)
         .bind(&input.files)
         .fetch_one(&self.pool)
         .await?;
+
+        // if decision is reply, create a new message
+        if let AgentDecision::Reply(reply) = decision {
+            let chat = self
+                .get_chat_by_id(chat_id)
+                .await?
+                .expect("chat should exist");
+            if chat.r#type != ChatType::Single {
+                warn!(
+                    "reply decision found in non single chat {}. reply: {}",
+                    chat_id, reply
+                );
+            }
+            let other_user_id = chat
+                .members
+                .into_iter()
+                .find(|m| m != &(user_id as i64))
+                .expect("other user should exist");
+            sqlx::query_as(
+                r#"
+              INSERT INTO messages (chat_id, sender_id, content)
+              VALUES ($1, $2, $3)
+              RETURNING id
+              "#,
+            )
+            .bind(chat_id as i64)
+            .bind(other_user_id as i64)
+            .bind(reply)
+            .bind(&input.files)
+            .fetch_one(&self.pool)
+            .await?;
+        }
 
         Ok(message)
     }

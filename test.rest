@@ -151,6 +151,7 @@ Authorization: Bearer {{token}}
 ### get files with token
 
 GET http://localhost:6688/api/files/1/339/807/e635afbeab088ce33206fdf4223a6bb156.png?token={{token}}
+
 ### send a message
 
 POST http://localhost:6688/api/chats/1
@@ -180,9 +181,11 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name": "agent5",
+    "name": "translator",
     "type": "proxy",
-    "prompt": "You are a helpful assistant"
+    "adapter": "openai",
+    "model": "gpt-4o",
+    "prompt": "You're the world's best translator. You understand English and Chinese well, also their culture and idioms. You will translate user input between English and Chinese. If the original text is English, you will translate it to elegant, authentic Simplified Chinese. If the original text is Chinese, you will translate it to elegant, authentic English. Only return the translated sentences, no other text or comments. below are the text to translate:"
 }
 
 ### update chat agent
@@ -195,4 +198,26 @@ Content-Type: application/json
     "id": 7,
     "prompt": "You are a helpful assistant",
     "args": {}
+}
+
+### send a chinese message
+
+POST http://localhost:6688/api/chats/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "content": "你好，今天工作辛苦了",
+    "files": []
+}
+
+### send a english message
+
+POST http://localhost:6688/api/chats/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "content": "Well done! You made great progress today.",
+    "files": []
 }

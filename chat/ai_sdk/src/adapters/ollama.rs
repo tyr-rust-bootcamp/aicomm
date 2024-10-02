@@ -1,4 +1,4 @@
-use crate::{AiService, Message};
+use crate::{AiAdapter, AiService, Message};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -75,6 +75,12 @@ impl AiService for OllamaAdapter {
         let response = self.client.post(url).json(&request).send().await?;
         let response: OllamaChatCompletionResponse = response.json().await?;
         Ok(response.message.content)
+    }
+}
+
+impl From<OllamaAdapter> for AiAdapter {
+    fn from(adapter: OllamaAdapter) -> Self {
+        AiAdapter::Ollama(adapter)
     }
 }
 
