@@ -158,7 +158,7 @@ mod tests {
             files: vec![],
         };
         let message = state
-            .create_message(input, 2, 1)
+            .create_message(input, 1, 1)
             .await
             .expect("create message failed");
         assert_eq!(message.content, "hello");
@@ -169,7 +169,7 @@ mod tests {
             files: vec!["1".to_string()],
         };
 
-        let err = state.create_message(input, 2, 1).await.unwrap_err();
+        let err = state.create_message(input, 1, 1).await.unwrap_err();
         assert_eq!(err.to_string(), "Invalid chat file path: 1");
 
         // valid files should work

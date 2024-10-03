@@ -24,9 +24,8 @@ INSERT INTO chats(ws_id, type, members)
 (1, 'group', '{1,3,4}');
 
 -- insert agent to chat
-INSERT INTO chat_agents(chat_id, name, type, prompt, args)
-  VALUES (1, 'translation', 'proxy',
-  'If language is Chinese, translate to English, if language is English, translate to Chinese. Please reply with the translated content directly. No explanation is needed. Here is the content: ', '{}');
+INSERT INTO chat_agents(chat_id, name, type, adapter, model, prompt, args)
+  VALUES (1, 'translation', 'proxy', 'test', 'gpt-4o', 'If language is Chinese, translate to English, if language is English, translate to Chinese. Please reply with the translated content directly. No explanation is needed. Here is the content: ', '{}');
 
 INSERT INTO messages(chat_id, sender_id, content)
   VALUES (1, 1, 'Hello, world!'),
