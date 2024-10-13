@@ -81,7 +81,7 @@ impl PgVector {
                 .as_ref()
                 // TODO: verify compiler optimizes the double loops away
                 .and_then(|v| v.get(&EmbeddedField::Combined))
-                .map(|v| v.iter().map(|f| *f).collect::<Vec<_>>())
+                .map(|v| v.to_vec())
                 .unwrap_or_default();
 
             let sql = format!(

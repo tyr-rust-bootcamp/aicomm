@@ -71,7 +71,7 @@ impl Agent for TapAgent {
 
 impl Agent for TestAgent {
     async fn process(&self, _msg: &str, _ctx: &AgentContext) -> Result<AgentDecision, AgentError> {
-        Ok(AgentDecision::None)
+        Ok(AgentDecision::Modify("test".to_string()))
     }
 }
 
