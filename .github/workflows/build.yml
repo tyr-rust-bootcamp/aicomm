@@ -20,7 +20,7 @@ jobs:
   build-rust:
     strategy:
       matrix:
-        platform: [ubuntu-latest]
+        platform: [ubuntu-22.04]
     runs-on: ${{ matrix.platform }}
     services:
       postgres:
