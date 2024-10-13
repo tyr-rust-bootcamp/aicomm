@@ -16,8 +16,8 @@ impl Persist for PgVector {
         let mut tx = pool.begin().await?;
 
         // create extension
-        let sql = format!("CREATE EXTENSION IF NOT EXISTS vector");
-        sqlx::query(&sql).execute(&mut *tx).await?;
+        let sql = "CREATE EXTENSION IF NOT EXISTS vector";
+        sqlx::query(sql).execute(&mut *tx).await?;
 
         // create table
         let sql = format!(
