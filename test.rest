@@ -243,3 +243,17 @@ Authorization: Bearer {{token}}
     "members": [1, 4],
     "public": false
 }
+
+### create chat agent
+
+POST http://localhost:6688/api/chats/5/agents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "code guru",
+    "type": "reply",
+    "adapter": "ollama",
+    "model": "llama3.2",
+    "prompt": "You will answer questions about code."
+}
