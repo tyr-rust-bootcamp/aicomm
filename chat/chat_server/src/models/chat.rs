@@ -65,6 +65,7 @@ impl AppState {
                 }
             }
         };
+
         let chat = sqlx::query_as(
             r#"
             INSERT INTO chats (ws_id, name, type, members)

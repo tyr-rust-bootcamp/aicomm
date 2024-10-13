@@ -1,5 +1,12 @@
 [workspace]
-members = ["chat_server", "chat_core", "notify_server", "chat_test", "ai_sdk"]
+members = [
+  "chat_server",
+  "chat_core",
+  "notify_server",
+  "chat_test",
+  "ai_sdk",
+  "bot-server",
+]
 resolver = "2"
 
 [workspace.dependencies]
@@ -26,6 +33,7 @@ sqlx = { version = "0.8.2", features = [
   "runtime-tokio",
   "tls-rustls",
 ] }
+swiftide-pgvector = { path = "../swiftide-pgvector" }
 thiserror = "1.0.64"
 tokio = { version = "1.40.0", features = ["rt", "rt-multi-thread", "macros"] }
 tower = "0.5.1"

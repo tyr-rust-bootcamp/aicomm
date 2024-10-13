@@ -1,25 +1,31 @@
 [package]
-name = "notify-server"
+name = "bot-server"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "bot"
+path = "src/server.rs"
+
+[[bin]]
+name = "indexer"
+path = "src/indexer.rs"
 
 [dependencies]
 anyhow = { workspace = true }
-axum = { workspace = true }
-axum-extra = { version = "0.9.4", features = ["typed-header"] }
 chat-core = { workspace = true }
-dashmap = "6.1.0"
 futures = "0.3.30"
-jwt-simple = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
 sqlx = { workspace = true }
-thiserror = { workspace = true }
-tokio = { workspace = true }
+swiftide = { version = "0.13.3", features = [
+    "fastembed",
+    "ollama",
+    "tree-sitter",
+] }
+swiftide-pgvector = { workspace = true }
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
 tokio-stream = { version = "0.1.16", features = ["sync"] }
-tower-http = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }

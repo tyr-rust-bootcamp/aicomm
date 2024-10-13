@@ -67,17 +67,20 @@ impl AppState {
         };
 
         let password_hash = hash_password(&input.password)?;
+        // TODO: this is just a demo for now
+        let is_bot = input.email.ends_with("@bot.org");
         let mut user: User = sqlx::query_as(
             r#"
-            INSERT INTO users (ws_id, email, fullname, password_hash)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, ws_id, fullname, email, created_at
+            INSERT INTO users (ws_id, email, fullname, password_hash, is_bot)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id, ws_id, fullname, email, is_bot, created_at
             "#,
         )
         .bind(ws.id)
         .bind(&input.email)
         .bind(&input.fullname)
         .bind(password_hash)
+        .bind(is_bot)
         .fetch_one(&self.pool)
         .await?;
 

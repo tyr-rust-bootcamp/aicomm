@@ -176,14 +176,14 @@ Authorization: Bearer {{token}}
 
 ### create chat agent
 
-POST http://localhost:6688/api/chats/2/agents
+POST http://localhost:6688/api/chats/1/agents
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name": "translator1",
+    "name": "translator",
     "type": "proxy",
-    "adapter": "test",
+    "adapter": "openai",
     "model": "gpt-4o",
     "prompt": "You're the world's best translator. You understand English and Chinese well, also their culture and idioms. You will translate user input between English and Chinese. If the original text is English, you will translate it to elegant, authentic Simplified Chinese. If the original text is Chinese, you will translate it to elegant, authentic English. Only return the translated sentences, no other text or comments. below are the text to translate:"
 }
@@ -220,4 +220,26 @@ Authorization: Bearer {{token}}
 {
     "content": "Well done! You made great progress today.",
     "files": []
+}
+
+### create a bot
+
+POST http://localhost:6688/api/signup
+Content-Type: application/json
+
+{
+    "workspace": "acme",
+    "fullname": "Her",
+    "email": "her@bot.org",
+    "password": "123456"
+}
+
+### create direct chat
+POST http://localhost:6688/api/chats
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "members": [1, 4],
+    "public": false
 }
