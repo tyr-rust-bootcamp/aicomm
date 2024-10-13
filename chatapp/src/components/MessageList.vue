@@ -85,6 +85,10 @@ export default {
       this.enlargedImage = { ...this.enlargedImage };
     },
     getMessageContent(message) {
+      // TODO: handle case where user is not logged in
+      if (!this.$store.state.user) {
+        return '';
+      }
       if (message.senderId === this.$store.state.user.id) {
         return message.content;
       } else {

@@ -69,7 +69,7 @@ export default {
       return this.$store.state.user.id;
     },
     activeChannelId() {
-      let channel = this.$store.state.activeChannel;
+      const channel = this.$store.state.activeChannel;
       if (!channel) {
         return null;
       }
