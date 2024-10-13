@@ -23,14 +23,14 @@ repos:
       - id: cargo-fmt
         name: cargo fmt
         description: Format files with rustfmt.
-        entry: bash -c 'for dir in chat chatapp/src-tauri; do (cd $dir && cargo fmt -- --check); done'
+        entry: bash -c 'for dir in chat swiftide-pgvector chatapp/src-tauri; do (cd $dir && cargo fmt -- --check); done'
         language: rust
         files: \.rs$
         args: []
       - id: cargo-deny
         name: cargo deny check
         description: Check cargo dependencies
-        entry: bash -c 'for dir in chat chatapp/src-tauri; do (cd $dir && cargo deny check -d); done'
+        entry: bash -c 'for dir in chat swiftide-pgvector chatapp/src-tauri; do (cd $dir && cargo deny check -d); done'
         language: rust
         files: \.rs$
         args: []
@@ -44,21 +44,21 @@ repos:
       - id: cargo-check
         name: cargo check
         description: Check the package for errors.
-        entry: bash -c 'for dir in chat chatapp/src-tauri; do (cd $dir && cargo check --all); done'
+        entry: bash -c 'for dir in chat swiftide-pgvector chatapp/src-tauri; do (cd $dir && cargo check --all); done'
         language: rust
         files: \.rs$
         pass_filenames: false
       - id: cargo-clippy
         name: cargo clippy
         description: Lint rust sources
-        entry: bash -c 'for dir in chat chatapp/src-tauri; do (cd $dir && cargo clippy --all-targets --all-features --tests --benches -- -D warnings); done'
+        entry: bash -c 'for dir in chat swiftide-pgvector chatapp/src-tauri; do (cd $dir && cargo clippy --all-targets --all-features --tests --benches -- -D warnings); done'
         language: rust
         files: \.rs$
         pass_filenames: false
       - id: cargo-test
         name: cargo test
         description: unit test for the project
-        entry: bash -c 'for dir in chat chatapp/src-tauri; do (cd $dir && cargo nextest run --all-features -- --include-ignored); done'
+        entry: bash -c 'for dir in chat swiftide-pgvector chatapp/src-tauri; do (cd $dir && cargo nextest run --all-features -- --include-ignored); done'
         language: rust
         files: \.rs$
         pass_filenames: false
