@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package analytics;
+
+/// 用户事件
+message AnalyticsEvent {
+  EventContext context = 1;
+
+  oneof event_type {
+    AppStartEvent app_start = 8;
+    AppExitEvent app_exit = 9;
+    UserLoginEvent user_login = 10;
+    UserLogoutEvent user_logout = 11;
+    UserRegisterEvent user_register = 12;
+    ChatCreatedEvent chat_created = 13;
+    MessageSentEvent message_sent = 14;
+    ChatJoinedEvent chat_joined = 15;
+    ChatLeftEvent chat_left = 16;
+    NavigationEvent navigation = 17;
+  }
+}
+
+/// 应用启动事件
+message AppStartEvent {
+}
+
+/// 应用退出事件
+message AppExitEvent {
+  enum ExitCode {
+    EXIT_CODE_UNSPECIFIED = 0;
+    EXIT_CODE_SUCCESS = 1;
+    EXIT_CODE_FAILURE = 2;
+  }
+  ExitCode exit_code = 1;
+}
+
+/// 用户登录事件
+message UserLoginEvent {
+  /// 用户邮箱(Email 是 PII，需要脱敏)
+  string email = 1;
+}
+
+/// 用户登出事件
+message UserLogoutEvent {
+  /// 用户邮箱(Email 是 PII，需要脱敏)
+  string email = 1;
+}
+
+/// 用户注册事件
+message UserRegisterEvent {
+  /// 用户邮箱(Email 是 PII，需要脱敏)
+  string email = 1;
+  /// 工作空间 ID
+  string workspace_id = 2;
+}
+
+/// chat 创建事件
+message ChatCreatedEvent {
+  /// 工作空间 ID
+  string workspace_id = 1;
+}
+
+/// 消息发送事件
+message MessageSentEvent {
+  /// chat ID
+  string chat_id = 1;
+  /// 消息类型
+  string type = 2;
+  /// 消息大小
+  int32 size = 3;
+  /// 附件数量
+  int32 total_files = 4;
+}
+
+/// 加入聊天事件
+message ChatJoinedEvent {
+  /// chat ID
+  string chat_id = 1;
+}
+
+/// 离开聊天事件
+message ChatLeftEvent {
+  /// chat ID
+  string chat_id = 1;
+}
+
+/// 页面切换事件
+message NavigationEvent {
+  /// 当前页面
+  string from = 1;
+  /// 目标页面
+  string to = 2;
+}
+
+/// 事件上下文
+message EventContext {
+  /// 客户端 ID
+  string client_id = 1;
+  /// 应用版本
+  string app_version = 2;
+  /// 系统信息
+  SystemInfo system = 3;
+  /// 用户 ID
+  string user_id = 4;
+  /// 客户端 IP
+  string ip = 5;
+  /// 用户代理
+  string user_agent = 6;
+  /// 地理位置
+  GeoLocation geo = 7;
+  /// 客户端时间戳
+  int64 client_ts = 8;
+  /// 服务器时间戳
+  int64 server_ts = 9;
+}
+
+/// 系统信息
+message SystemInfo {
+  /// 操作系统
+  string os = 1;
+  /// 系统架构
+  string arch = 2;
+  /// 用户语言
+  string locale = 3;
+  /// 用户时区
+  string timezone = 4;
+}
+
+message GeoLocation {
+  string country = 1;
+  string region = 2;
+  string city = 3;
+}

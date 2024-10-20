@@ -1,7 +1,8 @@
 use super::TokenVerify;
 use axum::{
+    body::Body,
     extract::{FromRequestParts, Query, Request, State},
-    http::StatusCode,
+    http::{request::Parts, StatusCode},
     middleware::Next,
     response::{IntoResponse, Response},
 };
@@ -22,41 +23,72 @@ where
     T: TokenVerify + Clone + Send + Sync + 'static,
 {
     let (mut parts, body) = req.into_parts();
-    let token =
-        match TypedHeader::<Authorization<Bearer>>::from_request_parts(&mut parts, &state).await {
-            Ok(TypedHeader(Authorization(bearer))) => bearer.token().to_string(),
-            Err(e) => {
-                if e.is_missing() {
-                    match Query::<Params>::from_request_parts(&mut parts, &state).await {
-                        Ok(params) => params.token.clone(),
-                        Err(e) => {
-                            let msg = format!("parse query params failed: {}", e);
-                            warn!(msg);
-                            return (StatusCode::UNAUTHORIZED, msg).into_response();
-                        }
-                    }
-                } else {
-                    let msg = format!("parse Authorization header failed: {}", e);
-                    warn!(msg);
-                    return (StatusCode::UNAUTHORIZED, msg).into_response();
-                }
-            }
-        };
+    match extract_token(&state, &mut parts).await {
+        Ok(token) => match set_user(&state, &token, parts, body) {
+            Ok(req) => next.run(req).await,
+            Err(msg) => return (StatusCode::FORBIDDEN, msg).into_response(),
+        },
+        Err(msg) => return (StatusCode::UNAUTHORIZED, msg).into_response(),
+    }
+}
 
-    let req = match state.verify(&token) {
+pub async fn extract_user<T>(State(state): State<T>, req: Request, next: Next) -> Response
+where
+    T: TokenVerify + Clone + Send + Sync + 'static,
+{
+    let (mut parts, body) = req.into_parts();
+    if let Ok(token) = extract_token(&state, &mut parts).await {
+        match set_user(&state, &token, parts, body) {
+            Ok(req) => next.run(req).await,
+            Err(msg) => return (StatusCode::FORBIDDEN, msg).into_response(),
+        }
+    } else {
+        let req = Request::from_parts(parts, body);
+        next.run(req).await
+    }
+}
+
+async fn extract_token<T>(state: &T, parts: &mut Parts) -> Result<String, String>
+where
+    T: TokenVerify + Clone + Send + Sync + 'static,
+{
+    match TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, &state).await {
+        Ok(TypedHeader(Authorization(bearer))) => Ok(bearer.token().to_string()),
+        Err(e) => {
+            if e.is_missing() {
+                match Query::<Params>::from_request_parts(parts, &state).await {
+                    Ok(params) => Ok(params.token.clone()),
+                    Err(e) => {
+                        let msg = format!("parse query params failed: {}", e);
+                        warn!(msg);
+                        return Err(msg);
+                    }
+                }
+            } else {
+                let msg = format!("parse Authorization header failed: {}", e);
+                warn!(msg);
+                return Err(msg);
+            }
+        }
+    }
+}
+
+fn set_user<T>(state: &T, token: &str, parts: Parts, body: Body) -> Result<Request, String>
+where
+    T: TokenVerify + Clone + Send + Sync + 'static,
+{
+    match state.verify(&token) {
         Ok(user) => {
             let mut req = Request::from_parts(parts, body);
             req.extensions_mut().insert(user);
-            req
+            Ok(req)
         }
         Err(e) => {
             let msg = format!("verify token failed: {:?}", e);
             warn!(msg);
-            return (StatusCode::FORBIDDEN, msg).into_response();
+            Err(msg)
         }
-    };
-
-    next.run(req).await
+    }
 }
 
 #[cfg(test)]

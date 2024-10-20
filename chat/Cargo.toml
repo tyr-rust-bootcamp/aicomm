@@ -6,6 +6,7 @@ members = [
   "chat_test",
   "ai_sdk",
   "bot-server",
+  "analytics-server",
 ]
 resolver = "2"
 

@@ -16,7 +16,7 @@ use tower_http::{
 };
 use tracing::Level;
 
-pub use auth::verify_token;
+pub use auth::{extract_user, verify_token};
 
 pub trait TokenVerify {
     type Error: fmt::Debug;
