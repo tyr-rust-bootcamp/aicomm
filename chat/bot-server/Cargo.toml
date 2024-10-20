@@ -11,6 +11,11 @@ path = "src/server.rs"
 name = "indexer"
 path = "src/indexer.rs"
 
+[features]
+default = []
+fastembed = ["swiftide/fastembed"]
+ollama = ["swiftide/ollama"]
+
 [dependencies]
 anyhow = { workspace = true }
 chat-core = { workspace = true }
@@ -19,13 +24,16 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
 sqlx = { workspace = true }
-swiftide = { version = "0.13.3", features = [
-    "fastembed",
-    "ollama",
-    "tree-sitter",
-] }
+swiftide = { version = "0.13.3", features = ["tree-sitter"] }
 swiftide-pgvector = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
 tokio-stream = { version = "0.1.16", features = ["sync"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+
+[dev-dependencies]
+swiftide = { version = "0.13.3", features = [
+    "fastembed",
+    "ollama",
+    "tree-sitter",
+] }
