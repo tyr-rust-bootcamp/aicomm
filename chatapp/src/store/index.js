@@ -4,6 +4,9 @@ import { jwtDecode } from "jwt-decode";
 import { getUrlBase } from '../utils';
 import { initSSE } from '../utils';
 import { formatMessageDate } from '../utils';
+import { sendAppStartEvent, sendUserLoginEvent, sendUserLogoutEvent, sendUserRegisterEvent, sendChatCreatedEvent, sendMessageSentEvent, sendChatJoinedEvent, sendChatLeftEvent, sendNavigationEvent } from '../analytics/event';
+import { v4 as uuidv4 } from 'uuid';
+import packageJson from '../../package.json';
 
 // Wrap axios calls in a function that handles 403 errors
 const network = async (store, method, url, data = null, headers = {}) => {
@@ -30,12 +33,13 @@ const network = async (store, method, url, data = null, headers = {}) => {
 
 export default createStore({
   state: {
+    context: {},        // Context for analytics events
     user: null,         // User information
     token: null,        // Authentication token
     workspace: {},      // Current workspace
     channels: [],       // List of channels
     messages: {},       // Messages hashmap, keyed by channel ID
-    users: {},         // Users hashmap under workspace, keyed by user ID
+    users: {},          // Users hashmap under workspace, keyed by user ID
     activeChannel: null,
     sse: null,
   },
@@ -85,6 +89,10 @@ export default createStore({
       state.activeChannel = channel;
     },
     loadUserState(state) {
+      setContext(state);
+
+      console.log("context:", state.context);
+
       const storedUser = localStorage.getItem('user');
       const storedToken = localStorage.getItem('token');
       const storedWorkspace = localStorage.getItem('workspace');
@@ -249,6 +257,36 @@ export default createStore({
         this.dispatch('initSSE');
       }
     },
+    async appStart({ state }) {
+      await sendAppStartEvent(state.context, state.token);
+    },
+    async appExit({ state }) {
+      await sendAppExitEvent(state.context, state.token);
+    },
+    async userLogin({ state }, { email }) {
+      await sendUserLoginEvent(state.context, state.token, email);
+    },
+    async userLogout({ state }) {
+      await sendUserLogoutEvent(state.context, state.token, state.user.email);
+    },
+    async userRegister({ state }, { email, workspaceId }) {
+      await sendUserRegisterEvent(state.context, state.token, email, workspaceId);
+    },
+    async chatCreated({ state }, { workspaceId }) {
+      await sendChatCreatedEvent(state.context, state.token, workspaceId);
+    },
+    async messageSent({ state }, { chatId, type, size, totalFiles }) {
+      await sendMessageSentEvent(state.context, state.token, chatId, type, size, totalFiles);
+    },
+    async chatJoined({ state }, { chatId }) {
+      await sendChatJoinedEvent(state.context, state.token, chatId);
+    },
+    async chatLeft({ state }, { chatId }) {
+      await sendChatLeftEvent(state.context, state.token, chatId);
+    },
+    async navigation({ state }, { from, to }) {
+      await sendNavigationEvent(state.context, state.token, from, to);
+    },
   },
   getters: {
     isAuthenticated(state) {
@@ -333,4 +371,43 @@ async function loadState(response, self, commit) {
     console.error('Failed to load user state:', error);
     throw error;
   }
+}
+
+async function setContext(state) {
+  // if clientId is not set, generate a new one and store it in local storage
+  let clientId = localStorage.getItem('clientId');
+  if (!clientId) {
+    clientId = uuidv4();
+    localStorage.setItem('clientId', clientId);
+  }
+
+  console.log("clientId:", clientId);
+
+  const appVersion = packageJson.version;
+  const userAgent = navigator.userAgent;
+  // extract os and arch from userAgent
+  const os = userAgent.match(/Macintosh|Windows|Linux/)[0];
+  const arch = "arm64";
+  // let info = await navigator.userAgentData.getHighEntropyValues(["architecture"]);
+  const system = {
+    os,
+    arch,
+    locale: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
+
+  let userId = state.user?.id;
+  // convert to string if not null
+  userId = userId ? userId.toString() : null;
+
+  const clientTs = (new Date()).getTime();
+
+  state.context = {
+    clientId,
+    appVersion,
+    system,
+    userId,
+    userAgent,
+    clientTs,
+  };
 }

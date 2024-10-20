@@ -8,7 +8,7 @@ use async_trait::async_trait;
 use axum::{
     body::Body,
     extract::{FromRequest, FromRequestParts},
-    http::{request::Parts, StatusCode},
+    http::{request::Parts, Request, StatusCode},
     response::{IntoResponse, Response},
 };
 use futures_util::StreamExt;
@@ -53,12 +53,17 @@ where
 {
     type Rejection = ProtobufRejection;
 
-    async fn from_request(req: axum::http::Request<Body>, _: &S) -> Result<Self, Self::Rejection> {
-        req.headers()
-            .get("content-type")
-            .and_then(|value| value.to_str().ok())
-            .filter(|value| *value == "application/protobuf")
-            .ok_or(ProtobufRejection::MissingProtobufContentType)?;
+    async fn from_request(req: Request<Body>, _: &S) -> Result<Self, Self::Rejection> {
+        // if content type exists but is not application/protobuf, reject
+        if let Some(content_type) = req.headers().get("content-type") {
+            content_type
+                .to_str()
+                .ok()
+                .filter(|value| {
+                    *value == "application/protobuf" || *value == "application/octet-stream"
+                })
+                .ok_or(ProtobufRejection::MissingProtobufContentType)?;
+        }
 
         let mut body = req.into_body().into_data_stream();
         let mut buf = Vec::new();

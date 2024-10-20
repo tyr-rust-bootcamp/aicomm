@@ -88,6 +88,8 @@ export default {
 
       console.log('Sending message:', payload);
 
+      this.$store.dispatch('messageSent', { chatId: payload.chatId, type: "text", size: payload.content.length, totalFiles: payload.files.length });
+
       try {
         this.$store.dispatch('sendMessage', payload);
         this.message = ''; // Clear the input after sending

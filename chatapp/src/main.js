@@ -14,4 +14,6 @@ store.dispatch('loadUserState');
 app.use(store);
 app.use(router);
 
+store.dispatch('appStart');
+
 app.mount('#app');
