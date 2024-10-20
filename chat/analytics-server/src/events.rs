@@ -1,8 +1,53 @@
 use crate::{
-    handler::{AnalyticsEventRow, EventTypeRow, ExitCodeRow},
-    pb::{analytics_event::EventType, app_exit_event::ExitCode, *},
+    pb::{analytics_event::EventType, *},
     AppError,
 };
+use clickhouse::Row;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Clone, Row, Serialize, Deserialize)]
+pub struct AnalyticsEventRow {
+    // EventContext fields
+    pub client_id: String,
+    pub app_version: String,
+    pub system_os: String,
+    pub system_arch: String,
+    pub system_locale: String,
+    pub system_timezone: String,
+    pub user_id: Option<String>,
+    pub ip: Option<String>,
+    pub user_agent: Option<String>,
+    pub geo_country: Option<String>,
+    pub geo_region: Option<String>,
+    pub geo_city: Option<String>,
+    pub client_ts: i64,
+    pub server_ts: i64,
+    // Common fields
+    pub event_type: String,
+    // AppExitEvent fields
+    pub exit_code: Option<String>,
+    // UserLoginEvent
+    pub login_email: Option<String>,
+    // UserLogoutEvent
+    pub logout_email: Option<String>,
+    // UserRegisterEvent
+    pub register_email: Option<String>,
+    pub register_workspace_id: Option<String>,
+    // ChatCreatedEvent
+    pub chat_created_workspace_id: Option<String>,
+    // MessageSentEvent
+    pub message_chat_id: Option<String>,
+    pub message_type: Option<String>,
+    pub message_size: Option<i32>,
+    pub message_total_files: Option<i32>,
+    // ChatJoinedEvent
+    pub chat_joined_id: Option<String>,
+    // ChatLeftEvent
+    pub chat_left_id: Option<String>,
+    // NavigationEvent
+    pub navigation_from: Option<String>,
+    pub navigation_to: Option<String>,
+}
 
 trait EventConsume {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError>;
@@ -36,6 +81,8 @@ impl EventConsume for EventContext {
             row.system_arch = system.arch;
             row.system_locale = system.locale;
             row.system_timezone = system.timezone;
+        } else {
+            return Err(AppError::MissingSystemInfo);
         }
 
         if !self.user_id.is_empty() {
@@ -80,22 +127,22 @@ impl EventConsume for EventType {
 
 impl EventConsume for AppStartEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::AppStart;
+        row.event_type = "app_start".to_string();
         Ok(())
     }
 }
 
 impl EventConsume for AppExitEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::AppExit;
-        row.exit_code = Some(self.exit_code().into());
+        row.event_type = "app_exit".to_string();
+        row.exit_code = Some(self.exit_code().as_str_name().to_string());
         Ok(())
     }
 }
 
 impl EventConsume for UserLoginEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::UserLogin;
+        row.event_type = "user_login".to_string();
         row.login_email = Some(self.email);
         Ok(())
     }
@@ -103,7 +150,7 @@ impl EventConsume for UserLoginEvent {
 
 impl EventConsume for UserLogoutEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::UserLogout;
+        row.event_type = "user_logout".to_string();
         row.logout_email = Some(self.email);
         Ok(())
     }
@@ -111,7 +158,7 @@ impl EventConsume for UserLogoutEvent {
 
 impl EventConsume for UserRegisterEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::UserRegister;
+        row.event_type = "user_register".to_string();
         row.register_email = Some(self.email);
         row.register_workspace_id = Some(self.workspace_id);
         Ok(())
@@ -120,7 +167,7 @@ impl EventConsume for UserRegisterEvent {
 
 impl EventConsume for ChatCreatedEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::ChatCreated;
+        row.event_type = "chat_created".to_string();
         row.chat_created_workspace_id = Some(self.workspace_id);
         Ok(())
     }
@@ -128,7 +175,7 @@ impl EventConsume for ChatCreatedEvent {
 
 impl EventConsume for MessageSentEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::MessageSent;
+        row.event_type = "message_sent".to_string();
         row.message_chat_id = Some(self.chat_id);
         row.message_type = Some(self.r#type);
         row.message_size = Some(self.size);
@@ -138,7 +185,7 @@ impl EventConsume for MessageSentEvent {
 
 impl EventConsume for ChatJoinedEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::ChatJoined;
+        row.event_type = "chat_joined".to_string();
         row.chat_joined_id = Some(self.chat_id);
         Ok(())
     }
@@ -146,7 +193,7 @@ impl EventConsume for ChatJoinedEvent {
 
 impl EventConsume for ChatLeftEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::ChatLeft;
+        row.event_type = "chat_left".to_string();
         row.chat_left_id = Some(self.chat_id);
         Ok(())
     }
@@ -154,19 +201,9 @@ impl EventConsume for ChatLeftEvent {
 
 impl EventConsume for NavigationEvent {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError> {
-        row.event_type = EventTypeRow::Navigation;
+        row.event_type = "navigation".to_string();
         row.navigation_from = Some(self.from);
         row.navigation_to = Some(self.to);
         Ok(())
-    }
-}
-
-impl From<ExitCode> for ExitCodeRow {
-    fn from(exit_code: ExitCode) -> Self {
-        match exit_code {
-            ExitCode::Unspecified => ExitCodeRow::Unspecified,
-            ExitCode::Success => ExitCodeRow::Success,
-            ExitCode::Failure => ExitCodeRow::Failure,
-        }
     }
 }

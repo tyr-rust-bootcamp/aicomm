@@ -15,9 +15,9 @@ CREATE TABLE analytics_events(
     client_ts DateTime64(3),
     server_ts DateTime64(3),
     -- Common fields
-    event_type Enum8('app_start' = 1, 'app_exit' = 2, 'user_login' = 3, 'user_logout' = 4, 'user_register' = 5, 'chat_created' = 6, 'message_sent' = 7, 'chat_joined' = 8, 'chat_left' = 9, 'navigation' = 10),
+    event_type String,
     -- AppExitEvent fields
-    exit_code Nullable(Enum8('EXIT_CODE_UNSPECIFIED' = 0, 'EXIT_CODE_SUCCESS' = 1, 'EXIT_CODE_FAILURE' = 2)),
+    exit_code Nullable(String),
     -- UserLoginEvent
     login_email Nullable(String),
     -- UserLogoutEvent
@@ -45,4 +45,3 @@ ORDER BY
         event_type,
         client_id
 );
-

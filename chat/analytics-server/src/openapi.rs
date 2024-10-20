@@ -1,4 +1,4 @@
-use crate::{handler::*, AppState, ErrorOutput};
+use crate::{handlers::*, AppState, ErrorOutput};
 use axum::Router;
 use utoipa::{
     openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme},

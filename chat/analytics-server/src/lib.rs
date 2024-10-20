@@ -2,13 +2,14 @@ mod config;
 mod error;
 mod events;
 mod extractors;
-mod handler;
+mod handlers;
 mod openapi;
 
 pub mod pb;
 
 pub use config::*;
 pub use error::*;
+pub use events::*;
 
 use anyhow::Context;
 use chat_core::{
@@ -16,7 +17,7 @@ use chat_core::{
     DecodingKey, User,
 };
 use clickhouse::Client;
-use handler::create_event_handler;
+use handlers::create_event_handler;
 use openapi::OpenApiRouter as _;
 use std::{fmt, ops::Deref, sync::Arc};
 use tokio::fs;
@@ -40,7 +41,6 @@ pub struct AppStateInner {
 
 pub async fn get_router(state: AppState) -> Result<Router, AppError> {
     let cors = CorsLayer::new()
-        // allow `GET` and `POST` when accessing the resource
         .allow_methods([
             Method::GET,
             Method::POST,
