@@ -3,7 +3,6 @@ members = [
   "chat_server",
   "chat_core",
   "notify_server",
-  "chat_test",
   "ai_sdk",
   "bot-server",
   "analytics-server",
