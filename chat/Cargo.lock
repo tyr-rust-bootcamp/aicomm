@@ -3631,9 +3631,9 @@ dependencies = [
 
 [[package]]
 name = "swiftide-pgvector"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5cffc29afad6ab005ea97743f27bbcdc1ed7196388740caa746fa838dd157cc"
+checksum = "9ac2329cb0d1c26afabab4890c453a05d381c67067b69e0c442852cc5e741466"
 dependencies = [
  "anyhow",
  "async-trait",
