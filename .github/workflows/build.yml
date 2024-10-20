@@ -40,6 +40,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
       - name: install dependencies
         run: |
           sudo apt-get update
