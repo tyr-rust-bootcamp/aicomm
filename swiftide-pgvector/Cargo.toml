@@ -1,6 +1,6 @@
 [package]
 name = "swiftide-pgvector"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 documentation = "https://docs.rs/swiftide-pgvector"
@@ -28,11 +28,6 @@ sqlx = { version = "0.8.2", features = [
     "runtime-tokio",
     "tls-rustls",
 ] }
-swiftide = { version = "0.13.3", features = [
-    "fastembed",
-    "ollama",
-    "tree-sitter",
-    "openai",
-] }
+swiftide = { version = "0.13.3", features = ["tree-sitter", "openai"] }
 tokio = { version = "1.40.0", features = ["rt", "rt-multi-thread", "macros"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
