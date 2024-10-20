@@ -45,3 +45,23 @@ ORDER BY
         event_type,
         client_id
 );
+
+-- Insert sample data for AppStartEvent
+INSERT INTO analytics_events(client_id, app_version, system_os, system_arch, system_locale, system_timezone, client_ts, server_ts, event_type)
+    VALUES ('client_001', '1.0.0', 'macOS', 'x86_64', 'en-US', 'America/New_York', now(), now(), 'AppStart');
+
+-- Insert sample data for UserLoginEvent
+INSERT INTO analytics_events(client_id, app_version, system_os, system_arch, system_locale, system_timezone, user_id, ip, client_ts, server_ts, event_type, login_email)
+    VALUES ('client_002', '1.0.1', 'Windows', 'x86_64', 'en-GB', 'Europe/London', 'user_123', '192.168.1.1', now(), now(), 'UserLogin', 'user@example.com');
+
+-- Insert sample data for MessageSentEvent
+INSERT INTO analytics_events(client_id, app_version, system_os, system_arch, system_locale, system_timezone, user_id, client_ts, server_ts, event_type, message_chat_id, message_type, message_size, message_total_files)
+    VALUES ('client_003', '1.0.2', 'Linux', 'aarch64', 'fr-FR', 'Europe/Paris', 'user_456', now(), now(), 'MessageSent', 'chat_789', 'text', 100, 0);
+
+-- Insert sample data for AppExitEvent
+INSERT INTO analytics_events(client_id, app_version, system_os, system_arch, system_locale, system_timezone, client_ts, server_ts, event_type, exit_code)
+    VALUES ('client_004', '1.0.3', 'iOS', 'arm64', 'ja-JP', 'Asia/Tokyo', now(), now(), 'AppExit', 'SUCCESS');
+
+-- Insert sample data for NavigationEvent
+INSERT INTO analytics_events(client_id, app_version, system_os, system_arch, system_locale, system_timezone, user_id, client_ts, server_ts, event_type, navigation_from, navigation_to)
+    VALUES ('client_005', '1.0.4', 'Android', 'arm64-v8a', 'es-ES', 'Europe/Madrid', 'user_789', now(), now(), 'Navigation', '/home', '/chat');
