@@ -24,7 +24,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
 sqlx = { workspace = true }
-swiftide = { version = "0.13.3", features = ["tree-sitter"] }
+swiftide = { version = "0.13.3", features = ["openai", "tree-sitter"] }
 swiftide-pgvector = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
 tokio-stream = { version = "0.1.16", features = ["sync"] }

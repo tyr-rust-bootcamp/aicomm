@@ -22,10 +22,10 @@ async fn main() -> Result<()> {
     let db_url = &config.server.db_url;
 
     let pool = PgPoolOptions::new().connect(db_url).await?;
-    let fastembed = integrations::fastembed::FastEmbed::try_default()?;
-    let client = integrations::ollama::Ollama::default()
-        .with_default_prompt_model("llama3.2")
-        .to_owned();
+    let client = integrations::openai::OpenAI::builder()
+        .default_embed_model("text-embedding-3-small")
+        .default_prompt_model("gpt-4o-mini")
+        .build()?;
     let store = PgVector::try_new(pool, VECTOR_SIZE as _).await?;
 
     indexing::Pipeline::from_loader(FileLoader::new(".").with_extensions(&["rs"]))
@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
             "rust",
             10..2048,
         )?)
-        .then_in_batch(Embed::new(fastembed).with_batch_size(10))
+        .then_in_batch(Embed::new(client).with_batch_size(10))
         .then_store_with(store)
         .run()
         .await?;
