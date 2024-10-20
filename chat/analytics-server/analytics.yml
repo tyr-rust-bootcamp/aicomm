@@ -2,6 +2,9 @@ server:
   port: 6690
   # clickhouse
   db_url: http://localhost:8123
+  db_user: ~
+  db_password: ~
+  db_name: analytics
   base_dir: /tmp/analytics_server
 auth:
   pk: |

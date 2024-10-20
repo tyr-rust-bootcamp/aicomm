@@ -1,5 +1,8 @@
 mod config;
 mod error;
+mod events;
+mod extractors;
+mod handler;
 mod openapi;
 
 pub mod pb;
@@ -9,20 +12,17 @@ pub use error::*;
 
 use anyhow::Context;
 use chat_core::{
-    middlewares::{set_layer, verify_token, TokenVerify},
-    DecodingKey, EncodingKey, User,
+    middlewares::{extract_user, set_layer, TokenVerify},
+    DecodingKey, User,
 };
 use clickhouse::Client;
+use handler::create_event_handler;
+use openapi::OpenApiRouter as _;
 use std::{fmt, ops::Deref, sync::Arc};
 use tokio::fs;
 use tower_http::cors::{self, CorsLayer};
 
-use axum::{
-    http::Method,
-    middleware::from_fn_with_state,
-    routing::{get, post},
-    Router,
-};
+use axum::{http::Method, middleware::from_fn_with_state, routing::post, Router};
 
 pub use config::AppConfig;
 
@@ -35,8 +35,7 @@ pub struct AppState {
 pub struct AppStateInner {
     pub(crate) config: AppConfig,
     pub(crate) dk: DecodingKey,
-    pub(crate) ek: EncodingKey,
-    pub(crate) pool: Client,
+    pub(crate) client: Client,
 }
 
 pub async fn get_router(state: AppState) -> Result<Router, AppError> {
@@ -52,21 +51,12 @@ pub async fn get_router(state: AppState) -> Result<Router, AppError> {
         .allow_origin(cors::Any)
         .allow_headers(cors::Any);
     let api = Router::new()
-        .route("/users", get(list_chat_users_handler))
-        .nest("/chats", chat)
-        .route("/upload", post(upload_handler))
-        .route("/files/:ws_id/*path", get(file_handler))
-        .layer(from_fn_with_state(state.clone(), verify_token::<AppState>))
+        .route("/event", post(create_event_handler))
+        .layer(from_fn_with_state(state.clone(), extract_user::<AppState>))
         // routes doesn't need token verification
-        .route("/signin", post(signin_handler))
-        .route("/signup", post(signup_handler))
         .layer(cors);
 
-    let app = Router::new()
-        .openapi()
-        .route("/", get(index_handler))
-        .nest("/api", api)
-        .with_state(state);
+    let app = Router::new().openapi().nest("/api", api).with_state(state);
 
     Ok(set_layer(app))
 }
@@ -94,17 +84,17 @@ impl AppState {
             .await
             .context("create base_dir failed")?;
         let dk = DecodingKey::load(&config.auth.pk).context("load pk failed")?;
-        let ek = EncodingKey::load(&config.auth.sk).context("load sk failed")?;
-        let pool = PgPool::connect(&config.server.db_url)
-            .await
-            .context("connect to db failed")?;
+        let mut client = Client::default()
+            .with_url(&config.server.db_url)
+            .with_database(&config.server.db_name);
+        if let Some(user) = config.server.db_user.as_ref() {
+            client = client.with_user(user);
+        }
+        if let Some(password) = config.server.db_password.as_ref() {
+            client = client.with_password(password);
+        }
         Ok(Self {
-            inner: Arc::new(AppStateInner {
-                config,
-                ek,
-                dk,
-                pool,
-            }),
+            inner: Arc::new(AppStateInner { config, dk, client }),
         })
     }
 }
@@ -114,54 +104,5 @@ impl fmt::Debug for AppStateInner {
         f.debug_struct("AppStateInner")
             .field("config", &self.config)
             .finish()
-    }
-}
-
-#[cfg(feature = "test-util")]
-mod test_util {
-    use super::*;
-    use sqlx::{Executor, PgPool};
-    use sqlx_db_tester::TestPg;
-
-    impl AppState {
-        pub async fn new_for_test() -> Result<(TestPg, Self), AppError> {
-            let config = AppConfig::load()?;
-            let dk = DecodingKey::load(&config.auth.pk).context("load pk failed")?;
-            let ek = EncodingKey::load(&config.auth.sk).context("load sk failed")?;
-            let post = config.server.db_url.rfind('/').expect("invalid db_url");
-            let server_url = &config.server.db_url[..post];
-            let (tdb, pool) = get_test_pool(Some(server_url)).await;
-            let state = Self {
-                inner: Arc::new(AppStateInner {
-                    config,
-                    ek,
-                    dk,
-                    pool,
-                }),
-            };
-            Ok((tdb, state))
-        }
-    }
-
-    pub async fn get_test_pool(url: Option<&str>) -> (TestPg, PgPool) {
-        let url = match url {
-            Some(url) => url.to_string(),
-            None => "postgres://postgres:postgres@localhost:5432".to_string(),
-        };
-        let tdb = TestPg::new(url, std::path::Path::new("../migrations"));
-        let pool = tdb.get_pool().await;
-
-        // run prepared sql to insert test dat
-        let sql = include_str!("../fixtures/test.sql").split(';');
-        let mut ts = pool.begin().await.expect("begin transaction failed");
-        for s in sql {
-            if s.trim().is_empty() {
-                continue;
-            }
-            ts.execute(s).await.expect("execute sql failed");
-        }
-        ts.commit().await.expect("commit transaction failed");
-
-        (tdb, pool)
     }
 }

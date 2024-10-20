@@ -47,17 +47,7 @@ pub struct AppExitEvent {
 }
 /// Nested message and enum types in `AppExitEvent`.
 pub mod app_exit_event {
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum ExitCode {
         Unspecified = 0,

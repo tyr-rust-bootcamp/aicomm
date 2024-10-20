@@ -1,5 +1,5 @@
+use analytics_server::{get_router, AppConfig, AppState};
 use anyhow::Result;
-use chat_server::{get_router, AppConfig, AppState};
 use tokio::net::TcpListener;
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::{fmt::Layer, layer::SubscriberExt, util::SubscriberInitExt, Layer as _};

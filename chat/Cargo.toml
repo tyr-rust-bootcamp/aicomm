@@ -12,12 +12,12 @@ resolver = "2"
 
 [workspace.dependencies]
 anyhow = "1.0.89"
-axum = { version = "0.7.6", features = [
+axum = { version = "0.7.7", features = [
   "http2",
   "query",
   "tracing",
   "multipart",
-  # "macros",
+  "macros",
 ] }
 axum-extra = { version = "0.9.4", features = ["typed-header"] }
 chrono = { version = "0.4.38", features = ["serde"] }

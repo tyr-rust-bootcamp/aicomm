@@ -1,6 +1,5 @@
 use super::TokenVerify;
 use axum::{
-    body::Body,
     extract::{FromRequestParts, Query, Request, State},
     http::{request::Parts, StatusCode},
     middleware::Next,
@@ -24,11 +23,14 @@ where
 {
     let (mut parts, body) = req.into_parts();
     match extract_token(&state, &mut parts).await {
-        Ok(token) => match set_user(&state, &token, parts, body) {
-            Ok(req) => next.run(req).await,
-            Err(msg) => return (StatusCode::FORBIDDEN, msg).into_response(),
-        },
-        Err(msg) => return (StatusCode::UNAUTHORIZED, msg).into_response(),
+        Ok(token) => {
+            let mut req = Request::from_parts(parts, body);
+            match set_user(&state, &token, &mut req) {
+                Ok(_) => next.run(req).await,
+                Err(msg) => (StatusCode::FORBIDDEN, msg).into_response(),
+            }
+        }
+        Err(msg) => (StatusCode::UNAUTHORIZED, msg).into_response(),
     }
 }
 
@@ -37,15 +39,15 @@ where
     T: TokenVerify + Clone + Send + Sync + 'static,
 {
     let (mut parts, body) = req.into_parts();
-    if let Ok(token) = extract_token(&state, &mut parts).await {
-        match set_user(&state, &token, parts, body) {
-            Ok(req) => next.run(req).await,
-            Err(msg) => return (StatusCode::FORBIDDEN, msg).into_response(),
-        }
+    let req = if let Ok(token) = extract_token(&state, &mut parts).await {
+        let mut req = Request::from_parts(parts, body);
+        let _ = set_user(&state, &token, &mut req);
+        req
     } else {
-        let req = Request::from_parts(parts, body);
-        next.run(req).await
-    }
+        Request::from_parts(parts, body)
+    };
+
+    next.run(req).await
 }
 
 async fn extract_token<T>(state: &T, parts: &mut Parts) -> Result<String, String>
@@ -61,27 +63,26 @@ where
                     Err(e) => {
                         let msg = format!("parse query params failed: {}", e);
                         warn!(msg);
-                        return Err(msg);
+                        Err(msg)
                     }
                 }
             } else {
                 let msg = format!("parse Authorization header failed: {}", e);
                 warn!(msg);
-                return Err(msg);
+                Err(msg)
             }
         }
     }
 }
 
-fn set_user<T>(state: &T, token: &str, parts: Parts, body: Body) -> Result<Request, String>
+fn set_user<T>(state: &T, token: &str, req: &mut Request) -> Result<(), String>
 where
     T: TokenVerify + Clone + Send + Sync + 'static,
 {
-    match state.verify(&token) {
+    match state.verify(token) {
         Ok(user) => {
-            let mut req = Request::from_parts(parts, body);
             req.extensions_mut().insert(user);
-            Ok(req)
+            Ok(())
         }
         Err(e) => {
             let msg = format!("verify token failed: {:?}", e);

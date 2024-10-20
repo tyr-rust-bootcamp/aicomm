@@ -5,9 +5,12 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
+async-trait = "0.1.83"
 axum = { workspace = true }
 chat-core = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
 clickhouse = { version = "0.13.0", features = ["rustls-tls", "time"] }
+futures-util = { version = "0.3.31", default-features = false }
 prost = "0.13.3"
 prost-types = "0.13.3"
 serde = { workspace = true }

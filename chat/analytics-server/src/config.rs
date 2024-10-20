@@ -17,6 +17,9 @@ pub struct AuthConfig {
 pub struct ServerConfig {
     pub port: u16,
     pub db_url: String,
+    pub db_user: Option<String>,
+    pub db_password: Option<String>,
+    pub db_name: String,
     pub base_dir: PathBuf,
 }
 
