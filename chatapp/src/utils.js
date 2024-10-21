@@ -6,7 +6,10 @@ const SSE_URL = 'http://localhost:6687/events';
 let config = null;
 try {
   if (invoke) {
-    config = await invoke('get_config');
+    invoke('get_config').then((c) => {
+      config = c;
+      console.log('config:', c);
+    });
   }
 } catch (error) {
   console.warn('failed to get config: fallback');

@@ -4,5 +4,5 @@ inputs:
   - directory: ../protos
 plugins:
   - local: protoc-gen-es
-    opt: target=ts
+    opt: target=js
     out: src/gen
