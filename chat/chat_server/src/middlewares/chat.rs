@@ -5,6 +5,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use chat_core::User;
+use tracing::warn;
 
 pub async fn verify_chat(State(state): State<AppState>, req: Request, next: Next) -> Response {
     let (mut parts, body) = req.into_parts();
@@ -12,7 +13,11 @@ pub async fn verify_chat(State(state): State<AppState>, req: Request, next: Next
         .await
         .unwrap();
 
-    let user = parts.extensions.get::<User>().unwrap();
+    let Some(user) = parts.extensions.get::<User>() else {
+        warn!("user not found in request");
+        return AppError::NotLoggedIn.into_response();
+    };
+
     if !state
         .is_chat_member(chat_id, user.id as _)
         .await

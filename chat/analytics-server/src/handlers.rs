@@ -8,7 +8,6 @@ use axum::{
     http::{request::Parts, StatusCode},
     response::IntoResponse,
 };
-use chat_core::User;
 use tracing::info;
 
 /// Update the agent by id.
@@ -33,29 +32,7 @@ pub(crate) async fn create_event_handler(
     info!("received event: {:?}", event);
     let mut row = AnalyticsEventRow::try_from(event)?;
 
-    // get user info from extension
-    if let Some(user) = parts.extensions.get::<User>() {
-        row.user_id = Some(user.id.to_string());
-    } else {
-        row.user_id = None;
-    }
-
-    // use server geo info
-    if let Some(geo) = geo {
-        row.geo_country = Some(geo.country);
-        row.geo_region = Some(geo.region);
-        row.geo_city = Some(geo.city);
-    } else {
-        row.geo_country = None;
-        row.geo_region = None;
-        row.geo_city = None;
-    }
-
-    // override server_ts with current time
-    row.server_ts = chrono::Utc::now().timestamp_millis();
-
-    let data = serde_json::to_string_pretty(&row).unwrap();
-    info!("event: {}", data);
+    row.update_with_server_info(&parts, geo);
 
     let mut insert = state.client.insert("analytics_events")?;
     insert.write(&row).await?;

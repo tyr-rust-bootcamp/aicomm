@@ -9,9 +9,9 @@ async fn main() -> Result<()> {
     let layer = Layer::new().with_filter(LevelFilter::INFO);
     tracing_subscriber::registry().with(layer).init();
 
-    let addr = "0.0.0.0:6687";
-
     let config = AppConfig::load().expect("Failed to load config");
+    let addr = format!("0.0.0.0:{}", config.server.port);
+
     let app = get_router(config).await?;
 
     let listener = TcpListener::bind(&addr).await?;

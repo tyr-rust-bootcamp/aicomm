@@ -2,6 +2,8 @@ use crate::{
     pb::{analytics_event::EventType, *},
     AppError,
 };
+use axum::http::request::Parts;
+use chat_core::User;
 use clickhouse::Row;
 use serde::{Deserialize, Serialize};
 
@@ -51,6 +53,31 @@ pub struct AnalyticsEventRow {
 
 trait EventConsume {
     fn consume(self, row: &mut AnalyticsEventRow) -> Result<(), AppError>;
+}
+
+impl AnalyticsEventRow {
+    pub fn update_with_server_info(&mut self, parts: &Parts, geo: Option<GeoLocation>) {
+        // get user info from extension
+        if let Some(user) = parts.extensions.get::<User>() {
+            self.user_id = Some(user.id.to_string());
+        } else {
+            self.user_id = None;
+        }
+
+        // use server geo info
+        if let Some(geo) = geo {
+            self.geo_country = Some(geo.country);
+            self.geo_region = Some(geo.region);
+            self.geo_city = Some(geo.city);
+        } else {
+            self.geo_country = None;
+            self.geo_region = None;
+            self.geo_city = None;
+        }
+
+        // override server_ts with current time
+        self.server_ts = chrono::Utc::now().timestamp_millis();
+    }
 }
 
 impl TryFrom<AnalyticsEvent> for AnalyticsEventRow {

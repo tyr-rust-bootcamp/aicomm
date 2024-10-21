@@ -14,8 +14,7 @@ futures-util = { version = "0.3.31", default-features = false }
 prost = "0.13.3"
 prost-types = "0.13.3"
 serde = { workspace = true }
-serde_json = "1.0.132"
-serde_yaml = "0.9.34"
+serde_yaml = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tower-http = { workspace = true }
