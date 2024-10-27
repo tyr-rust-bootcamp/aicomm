@@ -33,6 +33,7 @@ pub(crate) async fn create_event_handler(
     let mut row = AnalyticsEventRow::try_from(event)?;
 
     row.update_with_server_info(&parts, geo);
+    row.set_session_id(&state);
 
     let mut insert = state.client.insert("analytics_events")?;
     insert.write(&row).await?;

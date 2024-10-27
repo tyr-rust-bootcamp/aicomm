@@ -18,4 +18,4 @@ tower = { workspace = true }
 tower-http = { workspace = true }
 tracing = { workspace = true }
 utoipa = { version = "4.2.3", features = ["axum_extras", "chrono"] }
-uuid = { version = "1.10.0", features = ["v7", "serde"] }
+uuid = { workspace = true }

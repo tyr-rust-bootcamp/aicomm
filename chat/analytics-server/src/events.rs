@@ -1,16 +1,21 @@
 use crate::{
     pb::{analytics_event::EventType, *},
-    AppError,
+    AppError, AppState,
 };
 use axum::http::request::Parts;
 use chat_core::User;
 use clickhouse::Row;
 use serde::{Deserialize, Serialize};
+use tracing::info;
+use uuid::Uuid;
+
+const SESSION_TIMEOUT: i64 = 10 * 60 * 1000; // 10 minutes
 
 #[derive(Debug, Default, Clone, Row, Serialize, Deserialize)]
 pub struct AnalyticsEventRow {
     // EventContext fields
     pub client_id: String,
+    pub session_id: String,
     pub app_version: String,
     pub system_os: String,
     pub system_arch: String,
@@ -77,6 +82,32 @@ impl AnalyticsEventRow {
 
         // override server_ts with current time
         self.server_ts = chrono::Utc::now().timestamp_millis();
+    }
+
+    pub fn set_session_id(&mut self, state: &AppState) {
+        if let Some(mut v) = state.sessions.get_mut(&self.client_id) {
+            let (session_id, last_server_ts) = v.value_mut();
+            if self.server_ts - *last_server_ts < SESSION_TIMEOUT {
+                self.session_id = session_id.clone();
+                *last_server_ts = self.server_ts;
+            } else {
+                let new_session_id = Uuid::now_v7().to_string();
+                self.session_id = new_session_id.clone();
+                info!(
+                    "Session {} expired, start a new session: {}",
+                    session_id, new_session_id
+                );
+                *last_server_ts = self.server_ts;
+                *session_id = new_session_id;
+            }
+        } else {
+            let session_id = Uuid::now_v7().to_string();
+            self.session_id = session_id.clone();
+            info!("No client id found, start a new session: {}", session_id);
+            state
+                .sessions
+                .insert(self.client_id.clone(), (session_id, self.server_ts));
+        }
     }
 }
 

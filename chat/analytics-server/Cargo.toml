@@ -10,6 +10,7 @@ axum = { workspace = true }
 chat-core = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 clickhouse = { version = "0.13.0", features = ["rustls-tls", "time"] }
+dashmap = { workspace = true }
 futures-util = { version = "0.3.31", default-features = false }
 prost = "0.13.3"
 prost-types = "0.13.3"
@@ -24,6 +25,7 @@ utoipa = { version = "4.2.3", features = ["axum_extras", "chrono"] }
 utoipa-rapidoc = { version = "4.0.0", features = ["axum"] }
 utoipa-redoc = { version = "4.0.0", features = ["axum"] }
 utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
+uuid = { workspace = true }
 
 [build-dependencies]
 anyhow = { workspace = true }

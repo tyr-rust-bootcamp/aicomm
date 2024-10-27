@@ -80,6 +80,7 @@ dependencies = [
  "chat-core",
  "chrono",
  "clickhouse",
+ "dashmap",
  "futures-util",
  "prost",
  "prost-build",
@@ -97,6 +98,7 @@ dependencies = [
  "utoipa-rapidoc",
  "utoipa-redoc",
  "utoipa-swagger-ui",
+ "uuid",
 ]
 
 [[package]]
