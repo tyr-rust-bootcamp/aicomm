@@ -48,6 +48,69 @@ ORDER BY
         server_ts
 );
 
+-- Create aggregated sessions table
+CREATE TABLE analytics.sessions(
+    date date,
+    client_id String,
+    session_id String,
+    session_start SimpleAggregateFunction(min, DateTime64(3)),
+    session_end SimpleAggregateFunction(max, DateTime64(3)),
+    total_events UInt32) ENGINE = SummingMergeTree()
+ORDER BY
+    (
+        date,
+        client_id,
+        session_id
+);
+
+-- Create materialized view to aggregate sessions
+CREATE MATERIALIZED VIEW analytics.sessions_mv TO analytics.sessions AS
+SELECT
+    toDate(server_ts) AS date,
+    client_id,
+    session_id,
+    minSimpleState(server_ts) AS session_start,
+    maxSimpleState(server_ts) AS session_end,
+    count(1) AS total_events
+FROM
+    analytics.analytics_events
+GROUP BY
+    date,
+    client_id,
+    session_id;
+
+-- populate sessions table
+-- INSERT INTO analytics.sessions...;
+-- query sessions table
+SELECT
+    *,
+    dateDiff('second', session_start, session_end) AS session_length
+FROM
+    analytics.sessions FINAL;
+
+CREATE TABLE analytics.daily_sessions(
+    date date,
+    client_id String,
+    total_session_length SimpleAggregateFunction(sum, UInt64),
+    total_events SimpleAggregateFunction(sum, UInt64)) ENGINE = SummingMergeTree()
+ORDER BY
+    (
+        date,
+        client_id
+);
+
+CREATE MATERIALIZED VIEW analytics.daily_sessions_mv TO analytics.daily_sessions AS
+SELECT
+    date,
+    client_id,
+    sumSimpleState(dateDiff('second', session_start, session_end)) AS total_session_length,
+    sumSimpleState(total_events) AS total_events
+FROM
+    analytics.sessions
+GROUP BY
+    date,
+    client_id;
+
 -- Insert sample data for AppStartEvent
 INSERT INTO analytics.analytics_events(client_id, session_id, app_version, system_os, system_arch, system_locale, system_timezone, client_ts, server_ts, event_type)
     VALUES ('client_001', 'session_001', '1.0.0', 'macOS', 'x86_64', 'en-US', 'America/New_York', now(), now(), 'AppStart');
@@ -67,3 +130,4 @@ INSERT INTO analytics.analytics_events(client_id, session_id, app_version, syste
 -- Insert sample data for NavigationEvent
 INSERT INTO analytics.analytics_events(client_id, session_id, app_version, system_os, system_arch, system_locale, system_timezone, user_id, client_ts, server_ts, event_type, navigation_from, navigation_to)
     VALUES ('client_005', 'session_005', '1.0.4', 'Android', 'arm64-v8a', 'es-ES', 'Europe/Madrid', 'user_789', now(), now(), 'Navigation', '/home', '/chat');
+
