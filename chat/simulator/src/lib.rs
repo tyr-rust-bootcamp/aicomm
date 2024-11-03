@@ -33,6 +33,7 @@ pub struct SimUser {
     pub system_timezone: String,
     #[dummy(faker = "UUIDv4")]
     pub user_id: String,
+    // we should use maxminddb to get the real country, region and city: https://github.com/oschwald/maxminddb-rust
     #[dummy(faker = "IPv4()")]
     pub ip: String,
     #[dummy(faker = "UserAgent()")]

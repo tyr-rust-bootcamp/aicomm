@@ -1,14 +1,21 @@
+use std::{cmp::Reverse, ops::Range};
+
 use crate::{LoginData, MessageData, NavigationData, SimEvent, SimEventType, SimSession, SimUser};
 use analytics_server::AnalyticsEventRow;
 use anyhow::Result;
 use chat_core::pb::{
-    analytics_event::EventType, AnalyticsEvent, EventContext, GeoLocation, MessageSentEvent,
-    NavigationEvent, SystemInfo, UserLoginEvent,
+    AnalyticsEvent, EventContext, GeoLocation, MessageSentEvent, NavigationEvent, SystemInfo,
+    UserLoginEvent,
 };
 use chrono::{DateTime, Duration, Utc};
 use fake::{Fake, Faker};
 use rand::{distributions::Uniform, Rng as _};
-use uuid::Uuid;
+use uuid::{ContextV7, Timestamp, Uuid};
+
+const SERVER_TS_MILLIS: Range<i64> = 1..100;
+const SESSION_START_OFFSET_DAYS: Range<i64> = 1..540;
+const SESSION_LENGTH_MINUTES: Range<i64> = 10..120;
+
 impl From<LoginData> for UserLoginEvent {
     fn from(data: LoginData) -> Self {
         UserLoginEvent { email: data.email }
@@ -62,8 +69,8 @@ impl From<SimUser> for EventContext {
 
 impl From<SimEvent> for AnalyticsEvent {
     fn from(data: SimEvent) -> Self {
-        let context = EventContext::from(data.user);
-        let event: EventType = match data.event_type {
+        let context = data.user.into();
+        let event = match data.event_type {
             SimEventType::Login(login_data) => UserLoginEvent::from(login_data).into(),
             SimEventType::Navigation(navigation_data) => {
                 NavigationEvent::from(navigation_data).into()
@@ -90,21 +97,28 @@ impl SimSession {
 
     pub fn list(user: &SimUser, sessions: usize, events: usize) -> Vec<Self> {
         let rng = &mut rand::thread_rng();
-        let range = Uniform::from(180..540);
-        let rand_days: Vec<i64> = rng.sample_iter(&range).take(sessions).collect();
+        let range = Uniform::from(SESSION_START_OFFSET_DAYS);
+        let mut rand_days: Vec<i64> = rng.sample_iter(&range).take(sessions).collect();
+        rand_days.sort_by_key(|d| Reverse(*d));
 
         rand_days
             .into_iter()
             .map(|days| {
                 let start = Utc::now() - Duration::days(days);
-                let end = start + Duration::minutes(rng.gen_range(10..120));
+                let end = start + Duration::minutes(rng.gen_range(SESSION_LENGTH_MINUTES));
                 Self::new(user, start, end, events)
             })
             .collect()
     }
 
     pub fn to_analytics_events(self) -> Result<Vec<AnalyticsEventRow>> {
-        let session_id = Uuid::new_v4().to_string();
+        let context = ContextV7::new();
+        let session_id = Uuid::new_v7(Timestamp::from_unix(
+            &context,
+            self.start.timestamp() as _,
+            self.start.timestamp_subsec_nanos() as _,
+        ))
+        .to_string();
         let start = self.start.timestamp_millis();
         let end = self.end.timestamp_millis();
         let interval = (end - start) / self.events.len() as i64;
@@ -115,9 +129,10 @@ impl SimSession {
                 event_type: event,
             };
             let mut row: AnalyticsEventRow = AnalyticsEvent::from(sim_event).try_into()?;
+            // update event row with session id and timestamp/duration
             row.session_id = session_id.clone();
             row.client_ts = start + i as i64 * interval;
-            row.server_ts = row.client_ts + rand::thread_rng().gen_range(0..100000);
+            row.server_ts = row.client_ts + rand::thread_rng().gen_range(SERVER_TS_MILLIS);
             row.duration = interval as u32;
 
             events.push(row);
