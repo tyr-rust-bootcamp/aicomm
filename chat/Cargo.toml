@@ -4,9 +4,10 @@ members = [
   "chat_core",
   "notify_server",
   "ai_sdk",
-  "bot-server",
-  "analytics-server",
-  "chat_test", "simulator",
+  "bot_server",
+  "analytics_server",
+  "chat_test",
+  "simulator",
 ]
 resolver = "2"
 

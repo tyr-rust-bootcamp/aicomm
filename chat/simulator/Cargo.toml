@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-analytics-server = { path = "../analytics-server" }
+analytics-server = { path = "../analytics_server" }
 chat-core = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 clickhouse = { version = "0.13.0", features = ["rustls-tls", "time"] }
