@@ -1,8 +1,8 @@
-use analytics_server::pb::{
+use anyhow::Result;
+use chat_core::pb::{
     analytics_event::EventType, app_exit_event::ExitCode, AnalyticsEvent, AppExitEvent,
     EventContext, GeoLocation, SystemInfo,
 };
-use anyhow::Result;
 use prost::Message;
 #[tokio::main]
 async fn main() -> Result<()> {

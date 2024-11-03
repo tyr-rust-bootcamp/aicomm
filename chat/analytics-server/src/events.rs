@@ -1,9 +1,9 @@
-use crate::{
-    pb::{analytics_event::EventType, *},
-    AppError, AppState,
-};
+use crate::{AppError, AppState};
 use axum::http::request::Parts;
-use chat_core::User;
+use chat_core::{
+    pb::{analytics_event::EventType, *},
+    User,
+};
 use clickhouse::Row;
 use serde::{Deserialize, Serialize};
 use tracing::{info, warn};

@@ -9,6 +9,8 @@ axum = { workspace = true }
 axum-extra = { workspace = true }
 chrono = { workspace = true }
 jwt-simple = { workspace = true }
+prost = "0.13.3"
+prost-types = "0.13.3"
 serde = { workspace = true }
 serde_json = { workspace = true }
 sqlx = { workspace = true }
@@ -19,3 +21,11 @@ tower-http = { workspace = true }
 tracing = { workspace = true }
 utoipa = { version = "4.2.3", features = ["axum_extras", "chrono"] }
 uuid = { workspace = true }
+
+
+[build-dependencies]
+anyhow = { workspace = true }
+prost-build = "0.13.3"
+proto-builder-trait = { version = "0.6.2", features = [
+    "prost",
+], default-features = false }

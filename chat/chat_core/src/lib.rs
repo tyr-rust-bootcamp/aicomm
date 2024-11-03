@@ -1,12 +1,14 @@
 mod utils;
 
 pub mod middlewares;
+pub mod pb;
+
+pub use utils::*;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use thiserror::Error;
-pub use utils::*;
 use utoipa::ToSchema;
 
 #[allow(async_fn_in_trait)]

@@ -1,6 +1,5 @@
 use crate::{
     extractors::{Geo, Protobuf},
-    pb::AnalyticsEvent,
     AnalyticsEventRow, AppError, AppState,
 };
 use axum::{
@@ -8,6 +7,7 @@ use axum::{
     http::{request::Parts, StatusCode},
     response::IntoResponse,
 };
+use chat_core::pb::AnalyticsEvent;
 use tracing::info;
 
 /// Update the agent by id.

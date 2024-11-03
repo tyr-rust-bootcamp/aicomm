@@ -3,7 +3,6 @@
 
 use std::convert::Infallible;
 
-use crate::pb::GeoLocation;
 use async_trait::async_trait;
 use axum::{
     body::Body,
@@ -11,6 +10,7 @@ use axum::{
     http::{request::Parts, Request, StatusCode},
     response::{IntoResponse, Response},
 };
+use chat_core::pb::GeoLocation;
 use futures_util::StreamExt;
 
 pub struct Protobuf<T>(pub T);

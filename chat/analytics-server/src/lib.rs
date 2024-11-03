@@ -5,8 +5,6 @@ mod extractors;
 mod handlers;
 mod openapi;
 
-pub mod pb;
-
 pub use config::*;
 use dashmap::DashMap;
 pub use error::*;

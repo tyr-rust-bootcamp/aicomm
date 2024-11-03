@@ -1,0 +1,19 @@
+[package]
+name = "simulator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+analytics-server = { path = "../analytics-server" }
+chat-core = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+clickhouse = { version = "0.13.0", features = ["rustls-tls", "time"] }
+dashmap = { workspace = true }
+fake = { version = "3.0.0", features = ["chrono", "derive", "uuid"] }
+rand = "0.8.5"
+serde = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }
